@@ -1,0 +1,158 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+<style>
+    body{background-color: #EEEEEE}a{text-decoration: none !important}.card-product-list, .card-product-grid{margin-bottom: 0}.card{width: 500px;position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;-webkit-box-orient: vertical;-webkit-box-direction: normal;-ms-flex-direction: column;flex-direction: column;min-width: 0;word-wrap: break-word;background-color: #fff;background-clip: border-box;border: 1px solid rgba(0, 0, 0, 0.1);border-radius: 23px;margin-top: 50px}.card-product-grid:hover{-webkit-box-shadow: 0 4px 15px rgba(153, 153, 153, 0.3);box-shadow: 0 4px 15px rgba(153, 153, 153, 0.3);-webkit-transition: .3s;transition: .3s}.card-product-grid .img-wrap{border-radius: 0.2rem 0.2rem 0 0;height: 220px}.card .img-wrap{overflow: hidden}.card-lg .img-wrap{height: 280px}.card-product-grid .img-wrap{border-radius: 0.2rem 0.2rem 0 0;height: 275px;padding: 16px}[class*='card-product'] .img-wrap img{height: 100%;max-width: 100%;width: auto;display: inline-block;-o-object-fit: cover;object-fit: cover}.img-wrap{text-align: center;display: block}.card-product-grid .info-wrap{overflow: hidden;padding: 18px 20px}[class*='card-product'] a.title{color: #212529;display: block}.rating-stars{display: inline-block;vertical-align: middle;list-style: none;margin: 0;padding: 0;position: relative;white-space: nowrap;clear: both}.rating-stars li.stars-active{z-index: 2;position: absolute;top: 0;left: 0;overflow: hidden}.rating-stars li{display: block;text-overflow: clip;white-space: nowrap;z-index: 1}.card-product-grid .bottom-wrap{padding: 18px;border-top: 1px solid #e4e4e4}.bottom-wrap-payment{padding: 0px;border-top: 1px solid #e4e4e4}.rated{font-size: 10px;color: #b3b4b6}.btn{display: inline-block;font-weight: 600;color: #343a40;text-align: center;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;background-color: transparent;border: 1px solid transparent;padding: 0.45rem 0.85rem;font-size: 1rem;line-height: 1.5;border-radius: 0.2rem; margin-left: 10px;}.btn-primary{color: #fff;background-color: #3167eb;border-color: #3167eb}.fa{color: #FF5722}
+    #input1
+    {
+        position: absolute;
+        right: 20px;
+        bottom: 95px;
+    }
+    #myImage
+    {
+        border-radius: 50px;
+        opacity:0.9;
+    }
+    #owner
+    {
+        position: absolute;
+        right: -170px;
+        top: 298px;
+    }
+    #input2
+    {
+        position: absolute;
+        right: 20px;
+        bottom: 25px;
+        text-decoration: none !important;
+        width: 120px;
+    }
+    #input2:hover
+    {
+        background-color: #ff0000d2;
+        color: rgb(255, 255, 255);
+    }
+    #won
+    {
+        position: absolute;
+        right: 100px;
+        color: green;
+        font: 20px solid;
+    }
+    #bottom_buttons
+    {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+    }
+    #bottom_buttons2
+    {
+        position: absolute;
+        right: 120px;
+        bottom: 20px;
+    }
+</style>
+
+    <h1>{{item.title}}</h1>
+    <form action="{% url 'watchlist' %}" method="post">
+        {% csrf_token %}
+        <div class="container d-flex justify-content-center">
+            <figure class="card card-product-grid card-lg"> 
+                <a class="img-wrap" data-abc="true"> 
+                    {% if item.image == "" %}
+                        <img id="myImage" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg">
+                    {% else %} 
+                        <img id="myImage" src="{{item.image}}"> 
+                    {% endif %}
+                </a>
+                <figcaption class="info-wrap">
+                    <div class="row">
+                        <div class="col-md-9 col-xs-9"> 
+                            <a class="title" data-abc="true">{{item.title}}</a> 
+                            <span class="rated">{{ item.category }}</span> 
+                        </div>
+                    </div>
+                </figcaption>
+                
+                <div class="bottom-wrap-payment">
+                    <figcaption class="info-wrap">
+                        <div class="row">
+                            <div class="col-md-9 col-xs-9"> 
+                                <a class="title" data-abc="true">${{ item.price }}</a> 
+                                <span class="rated">Current Bid</span> 
+                            </div>
+                            <div class="col-md-9 col-xs-9" id="owner"> 
+                                <a class="title" data-abc="true">By <strong>{{ item.owner }}</strong></a> 
+                                <span class="rated">Owner</span> 
+                            </div>
+                            {% if item.owner.username == user.username and item.active %}
+                                <input type="number" name="listing_id" value={{item.pk}} hidden>
+                                <input type="text" name="bidder" value={{user.username}} hidden>
+                                <input type="submit" class="btn btn-warning float-right" data-abc="true" name="Close" id="input2" value="Close Auction">
+                            {% elif not item.active %}
+                                {% if item.buyer.username == user.username %}
+                                    <p id="won">You Successfuly Bought this item!</p>
+                                {% else %}
+                                    <p>Item no longer available</p>
+                                {% endif %}
+                            {% else %}                                
+                                <input id="input1" type="number" min={{item.price}} name="User_Bid" placeholder="Your Bid">
+                                <div class="bottom-wrap"> 
+                                    {% if user.is_authenticated %}
+                                        <input type="number" name="listing_id" value={{item.pk}} hidden>
+                                        <input type="text" name="bidder" value={{user.username}} hidden>
+                                        <input type="submit" id="bottom_buttons" class="btn btn-primary float-right" data-abc="true" value="Place Bid" name="place_bid"> 
+                                        {% if item.pk in ids %}
+                                            <input type="submit" id="bottom_buttons2" class="btn btn-primary float-right" data-abc="true" value="Remove from Watchlist" name="add_watchlist">
+
+                                        {% else %}
+                                            <input type="submit" id="bottom_buttons2" class="btn btn-primary float-right" data-abc="true" value="Add to Watchlist" name="add_watchlist">
+                                        {% endif %}
+                                    {% else %}
+                                        <a href="{% url 'login' %}" class="btn btn-primary float-right" data-abc="true"> Log In </a> 
+                                    {% endif %}
+                                    <div class="price-wrap"> 
+                                        <a href="{% url 'index' %}" class="btn btn-warning float-left" data-abc="true"> Cancel </a> 
+                                    </div>
+                                </div>
+                            {% endif %}
+                            </figure>
+                        </div>
+                    </form>
+                
+                    <form action="{% url 'temp_listing' item.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="container d-flex justify-content-center">
+                            <figure class="card card-product-grid card-lg"> 
+                                <figcaption class="info-wrap">
+                                    <div class="row">
+                                        {% for comment in Comments %}
+                                            {% if comment.listing.id == item.id %}
+                                                <div class="col-md-9 col-xs-9"> 
+                                                    <p class="title" data-abc="true"><strong>{{comment.commentor}}</strong>: {{ comment.text }}</p> 
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if user.is_authenticated %}
+                                            <div class="col-md-9 col-xs-9"> 
+                                                <input type="hidden" name="username" value={{user.username}}>
+                                                <input type="text" name="User_Comment">
+                                                <input type="submit" name="Write_Comment" class="btn btn-primary float-right" value="Comment">
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </figcaption>
+                                
+                                
+                            </figure>
+                        </div>
+                    </form>
+                            
+                            
+                        </div>
+                    </figcaption>
+                </div>
+                
+
+{% endblock %}
